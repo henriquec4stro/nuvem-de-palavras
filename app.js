@@ -1,3 +1,9 @@
+// Variáveis de Zoom Globais (ou no escopo do DOMContentLoaded se preferir, mas mais simples aqui por agora)
+let currentZoom = 1.0;
+const ZOOM_STEP = 0.15;
+const MIN_ZOOM = 0.3;
+const MAX_ZOOM = 3.0;
+
 document.addEventListener('DOMContentLoaded', () => {
     // Seletores do DOM
     const textInput = document.getElementById('textInput');
@@ -10,6 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessageElement = document.getElementById('errorMessage');
     const wordCloudContainer = document.getElementById('wordCloudContainer');
 
+    // Seletores para botões de zoom
+    const zoomInButton = document.getElementById('zoomInButton');
+    const zoomOutButton = document.getElementById('zoomOutButton');
+    const zoomResetButton = document.getElementById('zoomResetButton');
+
 
     // Paletas de cores predefinidas
     const colorPalettes = {
@@ -19,6 +30,42 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     generateButton.addEventListener('click', handleGenerateCloud);
+
+    // Função para aplicar o zoom no canvas
+    function applyZoom() {
+        if (wordCloudCanvas) {
+            wordCloudCanvas.style.transform = `scale(${currentZoom})`;
+        }
+    }
+
+    // Event Listeners para os botões de zoom
+    if (zoomInButton) {
+        zoomInButton.addEventListener('click', () => {
+            if (currentZoom < MAX_ZOOM) {
+                currentZoom = parseFloat((currentZoom + ZOOM_STEP).toFixed(2));
+                if (currentZoom > MAX_ZOOM) currentZoom = MAX_ZOOM; // Garante que não ultrapasse
+                applyZoom();
+            }
+        });
+    }
+
+    if (zoomOutButton) {
+        zoomOutButton.addEventListener('click', () => {
+            if (currentZoom > MIN_ZOOM) {
+                currentZoom = parseFloat((currentZoom - ZOOM_STEP).toFixed(2));
+                if (currentZoom < MIN_ZOOM) currentZoom = MIN_ZOOM; // Garante que não seja menor
+                applyZoom();
+            }
+        });
+    }
+
+    if (zoomResetButton) {
+        zoomResetButton.addEventListener('click', () => {
+            currentZoom = 1.0;
+            applyZoom();
+        });
+    }
+
 
     function showLoading(isLoading) {
         if (isLoading) {
@@ -42,7 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayError(message) {
         errorMessageElement.textContent = message;
         errorMessageElement.style.display = 'block';
-        // Tenta limpar o canvas apenas se ele já foi usado
+        
+        currentZoom = 1.0; // Reseta o zoom em caso de erro
+        applyZoom();       // Aplica o zoom resetado visualmente
+
         if (wordCloudCanvas.width > 0 && wordCloudCanvas.height > 0) {
             const context = wordCloudCanvas.getContext('2d');
             if (context) {
@@ -56,8 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const genericFonts = ['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui'];
         if (primaryFont && !genericFonts.includes(primaryFont.toLowerCase())) {
             try {
-                await document.fonts.load(`1em "${primaryFont}"`); // Aspas para fontes com espaços
-                // console.log(`Fonte ${primaryFont} carregada ou já disponível.`); // Log Opcional
+                await document.fonts.load(`1em "${primaryFont}"`);
             } catch (err) {
                 console.warn(`Falha ao carregar a fonte ${primaryFont}:`, err);
             }
@@ -86,10 +135,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
             try {
-                const processedWords = textProcessingPipeline(rawText, maxWords);
+                // Removendo os logs internos da textProcessingPipeline para produção,
+                // mas mantendo os da cleanText se ainda precisar depurar a limpeza
+                const processedWords = textProcessingPipeline(rawText, maxWords, false); // Passando 'false' para desativar logs internos
+                
                 if (processedWords.length === 0) {
                     displayError("Nenhuma palavra significativa encontrada. Tente um texto diferente.");
-                    showLoading(false); // Certifique-se de que o loading é desativado aqui
+                    // showLoading(false); // Removido pois já está no finally
                     return;
                 }
                 renderWordCloud(processedWords, selectedPaletteKey, selectedFont);
@@ -97,47 +149,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Erro ao gerar nuvem:", error);
                 displayError("Ocorreu um erro inesperado. Verifique o console.");
             } finally {
-                showLoading(false); // Garante que o loading é desativado
+                showLoading(false);
             }
         }, 50);
     }
 
-    // Função cleanText ATUALIZADA com regex mais simples e logs detalhados:
-    function cleanText(text) {
-        console.log("  >> cleanText - Texto Original para Limpeza:", text);
+    function cleanText(text, enableLogs = false) { // Adicionado parâmetro para logs
+        if(enableLogs) console.log("  >> cleanText - Texto Original para Limpeza:", text);
         let cleanedText = text.toLowerCase();
-        console.log("  >> cleanText - Após toLowerCase:", cleanedText);
+        if(enableLogs) console.log("  >> cleanText - Após toLowerCase:", cleanedText);
 
-        // Regex MAIS SIMPLES: Remove tudo que NÃO for letra (a-z, e acentuadas comuns),
-        // número (0-9), espaço, apóstrofo ou hífen.
-        // Esta lista de acentuadas pode ser expandida se necessário.
         const regexKeepBasicChars = /[^a-z0-9\s'\-àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]+/g;
         cleanedText = cleanedText.replace(regexKeepBasicChars, ' ');
-        console.log("  >> cleanText - Após 1º replace (regexKeepBasicChars):", cleanedText);
-
-        // A segunda substituição para remover números.
-        // Se você quiser MANTER números como parte das palavras (ex: "ano2025"),
-        // comente ou remova a linha abaixo, pois o regexKeepBasicChars já os manteria (pois ele inclui 0-9).
-        // Se a intenção é SEMPRE remover números, esta linha garante isso.
-        const regexRemoveDigits = /[0-9]+/g; // Remove sequências de dígitos
+        if(enableLogs) console.log("  >> cleanText - Após 1º replace (regexKeepBasicChars):", cleanedText);
+        
+        const regexRemoveDigits = /[0-9]+/g;
         cleanedText = cleanedText.replace(regexRemoveDigits, '');
-        console.log("  >> cleanText - Após 2º replace (remover [0-9]):", cleanedText);
+        if(enableLogs) console.log("  >> cleanText - Após 2º replace (remover [0-9]):", cleanedText);
 
-        // Normaliza espaços múltiplos para um único espaço e remove espaços no início/fim.
         cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
-        console.log("  >> cleanText - Após normalizar espaços e trim (Resultado Final da Limpeza):", cleanedText);
+        if(enableLogs) console.log("  >> cleanText - Após normalizar espaços e trim (Resultado Final da Limpeza):", cleanedText);
         return cleanedText;
     }
 
-
     function tokenizeText(text) {
-        // Filtra palavras vazias que podem surgir do split e palavras com 1 caractere.
         return text.split(/\s+/).filter(word => word && word.length > 1);
     }
 
     function filterStopWords(tokens, stopWordsList) {
         if (!Array.isArray(stopWordsList)) {
-            console.warn("Lista de stop words não é um array. Nenhuma stop word será filtrada.");
+            if (typeof portugueseStopWords !== 'undefined' && !Array.isArray(portugueseStopWords)) {
+                 console.warn("Lista de stop words (portugueseStopWords) não é um array. Nenhuma stop word será filtrada.");
+            }
             return tokens;
         }
         const stopWordsSet = new Set(stopWordsList.map(word => word.toLowerCase()));
@@ -162,39 +205,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return wordFrequencies.slice(0, maxWords);
     }
 
-    // Função textProcessingPipeline com console.log para depuração:
-    function textProcessingPipeline(rawText, maxWords) {
-        console.log("--- INÍCIO DO PROCESSAMENTO ---");
-        console.log("1. Texto Original Recebido:", rawText);
+    function textProcessingPipeline(rawText, maxWords, enableDetailedLogs = false) { // Adicionado parâmetro para logs
+        if(enableDetailedLogs) console.log("--- INÍCIO DO PROCESSAMENTO ---");
+        if(enableDetailedLogs) console.log("1. Texto Original Recebido:", rawText);
 
-        const cleanedText = cleanText(rawText); // Esta cleanText agora tem os logs internos corretos
-        console.log("2. Texto Após Limpeza (Resultado de cleanText):", cleanedText); // Log do resultado geral de cleanText
+        const cleanedText = cleanText(rawText, enableDetailedLogs); // Passa o flag de logs
+        if(enableDetailedLogs) console.log("2. Texto Após Limpeza (Resultado de cleanText):", cleanedText);
 
         const tokens = tokenizeText(cleanedText);
-        console.log("3. Tokens Após Tokenização (tokenizeText):", tokens);
+        if(enableDetailedLogs) console.log("3. Tokens Após Tokenização (tokenizeText):", tokens);
 
         const currentStopWords = typeof portugueseStopWords !== 'undefined' ? portugueseStopWords : [];
-        console.log("4. Número de Stop Words na Lista Usada:", currentStopWords.length);
-        if (currentStopWords.length > 0 && currentStopWords.length <= 20) {
-            console.log("   (Exemplo de Stop Words:", currentStopWords.slice(0, 10).join(", ") + "...)");
-        } else if (currentStopWords.length > 20) {
-            console.log("   (A lista de stop words tem mais de 20 palavras, não será exibida completamente aqui)");
-        }
-
+        if(enableDetailedLogs) console.log("4. Número de Stop Words na Lista Usada:", currentStopWords.length);
+        // Removido log de exemplo de stopwords para diminuir poluição do console em produção
+        
         const filteredTokens = filterStopWords(tokens, currentStopWords);
-        console.log("5. Tokens Após Filtro de Stop Words (filterStopWords):", filteredTokens);
+        if(enableDetailedLogs) console.log("5. Tokens Após Filtro de Stop Words (filterStopWords):", filteredTokens);
 
         const frequencies = countFrequencies(filteredTokens);
-        console.log("6. Frequências Contadas (countFrequencies):", frequencies);
+        if(enableDetailedLogs) console.log("6. Frequências Contadas (countFrequencies):", frequencies);
 
         const sortedAndLimitedWords = sortAndLimitWords(frequencies, maxWords);
-        console.log("7. Palavras Finais Para Nuvem (sortAndLimitWords):", sortedAndLimitedWords);
-        console.log("--- FIM DO PROCESSAMENTO ---");
+        if(enableDetailedLogs) console.log("7. Palavras Finais Para Nuvem (sortAndLimitWords):", sortedAndLimitedWords);
+        if(enableDetailedLogs) console.log("--- FIM DO PROCESSAMENTO ---");
 
         return sortedAndLimitedWords;
     }
 
     function renderWordCloud(wordList, paletteKey, font) {
+        currentZoom = 1.0; // Reseta o zoom
+        applyZoom();       // Aplica o zoom resetado visualmente
+
         if (wordCloudContainer.offsetWidth > 0) {
             wordCloudCanvas.width = wordCloudContainer.offsetWidth;
             wordCloudCanvas.height = wordCloudContainer.clientHeight > 50 ? wordCloudContainer.clientHeight : 400;
@@ -250,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            WordCloud(wordCloudCanvas, options); // Chamada correta para a biblioteca
+            WordCloud(wordCloudCanvas, options);
         } catch (e) {
             console.error("Erro ao renderizar com WordCloud:", e);
             displayError("Falha ao renderizar a nuvem. Verifique o console.");
