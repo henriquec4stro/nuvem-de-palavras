@@ -125,6 +125,7 @@ button#generateCloudButton:disabled {
     border-bottom: 2px solid #eee;
     padding-bottom: 10px;
     font-size: 1.5rem;
+    text-align: center;
 }
 
 #wordCloudContainer {
@@ -139,9 +140,6 @@ button#generateCloudButton:disabled {
 
 #wordCloudCanvas {
     display: block;
-    /* max-width e max-height podem ser removidos se o overflow do container lida com o tamanho */
-    /* max-width: 100%; */
-    /* max-height: 100%; */
     transform-origin: center center; /* Ponto de origem do zoom */
     transition: transform 0.2s ease-out; /* Transição suave para o zoom */
 }
@@ -162,22 +160,107 @@ button#generateCloudButton:disabled {
 
 /* Estilos para os controles de zoom */
 #zoomControls {
-    margin-bottom: 15px; /* Adicionado para espaçamento */
+    margin-bottom: 15px; 
     text-align: center;
 }
 #zoomControls button {
     padding: 8px 12px;
     margin: 0 5px;
-    font-size: 1em; /* Reduzido um pouco para não serem tão grandes */
+    font-size: 1em; 
     cursor: pointer;
     border: 1px solid #ccc;
     background-color: #f9f9f9;
     border-radius: 4px;
-    min-width: 40px; /* Largura mínima para botões de + e - */
+    min-width: 40px; 
 }
 
 #zoomControls button:hover {
     background-color: #e9e9e9;
+}
+
+/* Estilos para a Lista de Frequência */
+#frequencyListSection {
+    margin-top: 30px; 
+    padding-top: 20px;
+    border-top: 1px solid #eee; 
+}
+
+#frequencyListSection h3 {
+    font-size: 1.3em; 
+    color: #444;
+    margin-top: 0; /* Remove margem superior padrão do h3 */
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#wordFrequencyList {
+    list-style: none;
+    padding: 0;
+    max-height: 400px; 
+    overflow-y: auto; 
+    border: 1px solid #e9e9e9;
+    border-radius: 4px;
+    background-color: #fff; 
+}
+
+#wordFrequencyList li {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e9e9e9; 
+    padding: 10px 15px;
+    margin-bottom: 0; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease;
+}
+
+#wordFrequencyList li:last-child {
+    border-bottom: none; 
+}
+
+#wordFrequencyList li:hover {
+    background-color: #f0f0f0; 
+}
+
+#wordFrequencyList li .rank {
+    font-weight: bold;
+    color: #007bff; 
+    min-width: 35px; 
+    text-align: right;
+    margin-right: 15px;
+}
+
+#wordFrequencyList li .word {
+    flex-grow: 1; 
+    color: #333;
+    font-weight: 500;
+}
+
+#wordFrequencyList li .count {
+    color: #555;
+    font-size: 0.9em;
+    background-color: #e9ecef; 
+    padding: 3px 8px;
+    border-radius: 10px; 
+    margin-left: 15px;
+    white-space: nowrap; 
+}
+
+/* Scrollbar sutil para a lista de frequência (Opcional, para Webkit/Blink) */
+#wordFrequencyList::-webkit-scrollbar {
+    width: 8px;
+}
+#wordFrequencyList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+#wordFrequencyList::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+#wordFrequencyList::-webkit-scrollbar-thumb:hover {
+    background: #bbb;
 }
 
 
@@ -206,8 +289,8 @@ footer {
         margin-bottom: 0;
     }
 
-    #wordCloudContainer { /* Ajusta altura em telas menores se usou vh */
-        height: 400px; /* Ou um valor vh menor */
+    #wordCloudContainer { 
+        height: 400px; 
         min-height: 300px;
     }
 
@@ -216,7 +299,8 @@ footer {
     }
 
     #inputControlsSection h2,
-    #outputSection h2 {
+    #outputSection h2,
+    #frequencyListSection h3 { /* Ajusta também o título da lista de frequência */
         font-size: 1.3rem;
     }
 }
