@@ -164,7 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        frequencyListSection.style.display = 'block';
+        // ✅ CORREÇÃO AQUI
+        frequencyListSection.style.removeProperty('display');
 
         const topWords = wordArray.slice(0, topN);
 
@@ -238,6 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 🔓 Expor a função para testes no console
+    // 🔓 Para testes manuais no console
     window.displayFrequencyList = displayFrequencyList;
 });
