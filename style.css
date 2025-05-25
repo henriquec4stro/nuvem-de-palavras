@@ -1,5 +1,6 @@
+/* Reset básico e configurações globais */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: Arial, sans-serif;
     line-height: 1.6;
     margin: 0;
     padding: 0;
@@ -11,201 +12,172 @@ body {
 }
 
 header {
-    background: #333;
+    background-color: #333;
     color: #fff;
     padding: 1rem 0;
     text-align: center;
 }
 
-main {
-    flex: 1; /* Faz o main crescer para preencher o espaço disponível */
-    max-width: 1200px;
-    margin: 20px auto;
+header h1 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+main#appContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
     padding: 20px;
-    background: #fff;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    width: 95%; /* Garante que o conteúdo não toque as bordas em telas muito largas */
+    flex-grow: 1;
+    gap: 20px; /* Espaçamento entre as seções principais */
 }
 
-section {
+/* Seção de entrada e controles */
+#inputControlsSection {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    flex: 1; /* Ocupa espaço disponível */
+    min-width: 300px; /* Largura mínima */
+    max-width: 450px; /* Largura máxima */
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espaçamento interno */
+}
+
+#inputControlsSection section {
     margin-bottom: 20px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #fff; /* Fundo branco para seções */
 }
 
-h1, h2 {
+#inputControlsSection h2 {
+    margin-top: 0;
     color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    font-size: 1.5rem;
 }
 
 label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-weight: bold;
 }
 
-input[type="number"],
 textarea,
+input[type="number"],
 select {
-    width: 100%;
-    padding: 10px; /* Aumentado para melhor toque */
-    margin-bottom: 15px; /* Aumentado para melhor espaçamento */
-    border: 1px solid #ccc;
+    width: calc(100% - 20px); /* Desconta padding */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 1rem; /* Tamanho de fonte consistente */
+    box-sizing: border-box; /* Garante que padding não aumente a largura total */
 }
 
 textarea {
     resize: vertical; /* Permite redimensionamento vertical */
+    min-height: 100px;
 }
 
-button {
+button#generateCloudButton {
     display: block;
     width: 100%;
-    padding: 12px 15px; /* Aumentado para melhor clique */
+    padding: 12px 15px;
     background-color: #5cb85c;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 1.1rem; /* Levemente maior para destaque */
+    font-size: 1.1rem;
     transition: background-color 0.3s ease;
 }
 
-button:hover {
+button#generateCloudButton:hover {
     background-color: #4cae4c;
 }
 
-button:disabled {
+button#generateCloudButton:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
 
-footer {
-    text-align: center;
-    padding: 1rem 0;
-    background: #333;
-    color: #fff;
-    margin-top: auto; /* Empurra o footer para o final da página */
-}
-
-/* Estrutura principal da aplicação com Flexbox */
-#appContainer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-#inputControlsSection {
-    flex: 1;
-    min-width: 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
+/* Seção de saída da nuvem */
 #outputSection {
-    flex: 2;
-    min-width: 300px; /* Ajustado para melhor responsividade em telas menores */
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    flex: 2; /* Ocupa mais espaço que os controles */
+    min-width: 300px; /* Largura mínima */
     display: flex;
     flex-direction: column;
-    align-items: center;
+}
+
+#outputSection h2 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    font-size: 1.5rem;
 }
 
 #wordCloudContainer {
     width: 100%;
-    max-width: 600px;
-    height: 400px; /* Altura inicial, pode ser ajustada */
+    min-height: 300px; /* Altura mínima para o canvas */
+    height: 50vh; /* Altura relativa à viewport, ajuste conforme necessário */
     border: 1px dashed #ccc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #fff; /* Fundo para o canvas */
-    margin-top: 10px;
-    position: relative; /* Para posicionamento de elementos internos, se necessário */
+    box-sizing: border-box;
+    position: relative; /* Para posicionamento de elementos filhos, se necessário */
 }
 
 #wordCloudCanvas {
+    display: block; /* Remove espaço extra abaixo do canvas */
     max-width: 100%;
     max-height: 100%;
-    display: block; /* Remove espaço extra abaixo do canvas */
-}
-
-#loadingIndicator, #errorMessage {
-    width: calc(100% - 20px); /* Ajusta para padding */
-    max-width: 580px; /* Consistente com wordCloudContainer */
-    padding: 10px;
-    border-radius: 4px;
-    text-align: center;
-    margin: 10px auto 0; /* Centraliza e adiciona margem superior */
-    box-sizing: border-box;
 }
 
 #loadingIndicator {
-    background-color: #d9edf7;
-    border: 1px solid #bce8f1;
-    color: #31708f;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
 }
 
 #errorMessage {
-    background-color: #f2dede;
-    border: 1px solid #ebccd1;
-    color: #a94442;
+    background-color: #ffdddd;
+    border-left: 6px solid #f44336;
+    padding: 10px;
+    margin-bottom: 15px;
+    color: #721c24;
 }
 
+footer {
+    text-align: center;
+    padding: 15px;
+    background-color: #333;
+    color: white;
+    margin-top: auto; /* Empurra o rodapé para baixo */
+}
 
-/* Media Queries para Responsividade */
+/* Responsividade */
 @media (max-width: 768px) {
-    #appContainer {
+    main#appContainer {
         flex-direction: column;
+        align-items: center; /* Centraliza as seções na vertical */
     }
 
-    #inputControlsSection, #outputSection {
-        flex: 1 1 100%;
-        min-width: auto;
+    #inputControlsSection,
+    #outputSection {
+        max-width: 90%; /* Permite que ocupem mais da largura em telas menores */
+        width: 100%; /* Garante que ocupem a largura disponível */
     }
 
-    #wordCloudContainer {
-        height: 300px; /* Altura menor para telas mobile */
-    }
-
-    h1 {
-        font-size: 1.8rem;
-    }
-
-    h2 {
-        font-size: 1.3rem;
-    }
-}
-
-@media (max-width: 480px) {
-    main {
-        padding: 10px;
-    }
-
-    section {
-        padding: 10px;
-    }
-
-    input[type="number"],
-    textarea,
-    select {
-        padding: 8px;
-        margin-bottom: 10px;
-    }
-
-    button {
-        padding: 10px 12px;
-        font-size: 1rem;
-    }
-
-    h1 {
+    header h1 {
         font-size: 1.5rem;
     }
 
-    h2 {
-        font-size: 1.2rem;
+    #inputControlsSection h2,
+    #outputSection h2 {
+        font-size: 1.3rem;
     }
 }
