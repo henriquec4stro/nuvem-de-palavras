@@ -1,4 +1,4 @@
-// Variáveis de Zoom Globais (ou no escopo do DOMContentLoaded se preferir, mas mais simples aqui por agora)
+// Variáveis de Zoom Globais
 let currentZoom = 1.0;
 const ZOOM_STEP = 0.15;
 const MIN_ZOOM = 0.3;
@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const zoomOutButton = document.getElementById('zoomOutButton');
     const zoomResetButton = document.getElementById('zoomResetButton');
 
+    // Lista de frequência
+    const frequencyListSection = document.getElementById('frequencyListSection');
+    const wordFrequencyListElement = document.getElementById('wordFrequencyList');
 
     // Paletas de cores predefinidas
     const colorPalettes = {
@@ -29,21 +32,17 @@ document.addEventListener('DOMContentLoaded', () => {
         grayscale: ['#202020', '#404040', '#606060', '#808080', '#A0A0A0', '#C0C0C0', '#E0E0E0']
     };
 
-    generateButton.addEventListener('click', handleGenerateCloud);
-
-    // Função para aplicar o zoom no canvas
     function applyZoom() {
         if (wordCloudCanvas) {
             wordCloudCanvas.style.transform = `scale(${currentZoom})`;
         }
     }
 
-    // Event Listeners para os botões de zoom
     if (zoomInButton) {
         zoomInButton.addEventListener('click', () => {
             if (currentZoom < MAX_ZOOM) {
                 currentZoom = parseFloat((currentZoom + ZOOM_STEP).toFixed(2));
-                if (currentZoom > MAX_ZOOM) currentZoom = MAX_ZOOM; // Garante que não ultrapasse
+                if (currentZoom > MAX_ZOOM) currentZoom = MAX_ZOOM;
                 applyZoom();
             }
         });
@@ -53,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         zoomOutButton.addEventListener('click', () => {
             if (currentZoom > MIN_ZOOM) {
                 currentZoom = parseFloat((currentZoom - ZOOM_STEP).toFixed(2));
-                if (currentZoom < MIN_ZOOM) currentZoom = MIN_ZOOM; // Garante que não seja menor
+                if (currentZoom < MIN_ZOOM) currentZoom = MIN_ZOOM;
                 applyZoom();
             }
         });
@@ -66,39 +65,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
     function showLoading(isLoading) {
-        if (isLoading) {
-            loadingIndicator.style.display = 'block';
-            errorMessageElement.style.display = 'none';
-            generateButton.disabled = true;
-            textInput.disabled = true;
-            maxWordsInput.disabled = true;
-            colorPaletteSelect.disabled = true;
-            fontStyleSelect.disabled = true;
-        } else {
-            loadingIndicator.style.display = 'none';
-            generateButton.disabled = false;
-            textInput.disabled = false;
-            maxWordsInput.disabled = false;
-            colorPaletteSelect.disabled = false;
-            fontStyleSelect.disabled = false;
-        }
+        loadingIndicator.style.display = isLoading ? 'block' : 'none';
+        errorMessageElement.style.display = 'none';
+        if (frequencyListSection) frequencyListSection.style.display = 'none';
+        const disabled = isLoading;
+        [generateButton, textInput, maxWordsInput, colorPaletteSelect, fontStyleSelect].forEach(el => el.disabled = disabled);
     }
 
     function displayError(message) {
         errorMessageElement.textContent = message;
         errorMessageElement.style.display = 'block';
-        
-        currentZoom = 1.0; // Reseta o zoom em caso de erro
-        applyZoom();       // Aplica o zoom resetado visualmente
-
-        if (wordCloudCanvas.width > 0 && wordCloudCanvas.height > 0) {
-            const context = wordCloudCanvas.getContext('2d');
-            if (context) {
-                context.clearRect(0, 0, wordCloudCanvas.width, wordCloudCanvas.height);
-            }
-        }
+        currentZoom = 1.0;
+        applyZoom();
+        const context = wordCloudCanvas.getContext('2d');
+        if (context) context.clearRect(0, 0, wordCloudCanvas.width, wordCloudCanvas.height);
+        if (wordFrequencyListElement) wordFrequencyListElement.innerHTML = '';
+        if (frequencyListSection) frequencyListSection.style.display = 'none';
     }
 
     async function ensureFontIsLoaded(fontFamilyString) {
@@ -112,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
+
+    generateButton.addEventListener('click', handleGenerateCloud);
 
     async function handleGenerateCloud() {
         const rawText = textInput.value;
@@ -129,61 +114,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showLoading(true);
-        errorMessageElement.style.display = 'none';
 
         await ensureFontIsLoaded(selectedFont);
+        await new Promise(resolve => setTimeout(resolve, 50)); // delay artificial para UX
 
-        setTimeout(() => {
-            try {
-                // Removendo os logs internos da textProcessingPipeline para produção,
-                // mas mantendo os da cleanText se ainda precisar depurar a limpeza
-                const processedWords = textProcessingPipeline(rawText, maxWords, false); // Passando 'false' para desativar logs internos
-                
-                if (processedWords.length === 0) {
-                    displayError("Nenhuma palavra significativa encontrada. Tente um texto diferente.");
-                    // showLoading(false); // Removido pois já está no finally
-                    return;
-                }
-                renderWordCloud(processedWords, selectedPaletteKey, selectedFont);
-            } catch (error) {
-                console.error("Erro ao gerar nuvem:", error);
-                displayError("Ocorreu um erro inesperado. Verifique o console.");
-            } finally {
-                showLoading(false);
+        try {
+            const processedWords = textProcessingPipeline(rawText, maxWords, false);
+
+            if (processedWords.length === 0) {
+                displayError("Nenhuma palavra significativa encontrada. Tente um texto diferente.");
+                return;
             }
-        }, 50);
+
+            renderWordCloud(processedWords, selectedPaletteKey, selectedFont);
+            displayFrequencyList(processedWords, 15);
+
+        } catch (error) {
+            console.error("Erro ao gerar nuvem:", error);
+            displayError("Ocorreu um erro inesperado. Verifique o console.");
+        } finally {
+            showLoading(false);
+        }
     }
 
-    function cleanText(text, enableLogs = false) { // Adicionado parâmetro para logs
-        if(enableLogs) console.log("  >> cleanText - Texto Original para Limpeza:", text);
+    function cleanText(text, enableLogs = false) {
+        if (enableLogs) console.log("Texto original:", text);
         let cleanedText = text.toLowerCase();
-        if(enableLogs) console.log("  >> cleanText - Após toLowerCase:", cleanedText);
-
-        const regexKeepBasicChars = /[^a-z0-9\s'\-àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]+/g;
-        cleanedText = cleanedText.replace(regexKeepBasicChars, ' ');
-        if(enableLogs) console.log("  >> cleanText - Após 1º replace (regexKeepBasicChars):", cleanedText);
-        
-        const regexRemoveDigits = /[0-9]+/g;
-        cleanedText = cleanedText.replace(regexRemoveDigits, '');
-        if(enableLogs) console.log("  >> cleanText - Após 2º replace (remover [0-9]):", cleanedText);
-
-        cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
-        if(enableLogs) console.log("  >> cleanText - Após normalizar espaços e trim (Resultado Final da Limpeza):", cleanedText);
-        return cleanedText;
+        cleanedText = cleanedText.replace(/[^a-z0-9\s'\-àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]+/g, ' ');
+        cleanedText = cleanedText.replace(/[0-9]+/g, '');
+        return cleanedText.replace(/\s+/g, ' ').trim();
     }
 
     function tokenizeText(text) {
-        return text.split(/\s+/).filter(word => word && word.length > 1);
+        return text.split(/\s+/).filter(word => word.length > 1);
     }
 
     function filterStopWords(tokens, stopWordsList) {
-        if (!Array.isArray(stopWordsList)) {
-            if (typeof portugueseStopWords !== 'undefined' && !Array.isArray(portugueseStopWords)) {
-                 console.warn("Lista de stop words (portugueseStopWords) não é um array. Nenhuma stop word será filtrada.");
-            }
-            return tokens;
-        }
-        const stopWordsSet = new Set(stopWordsList.map(word => word.toLowerCase()));
+        const stopWordsSet = new Set((stopWordsList || []).map(word => word.toLowerCase()));
         return tokens.filter(token => !stopWordsSet.has(token.toLowerCase()));
     }
 
@@ -196,55 +163,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function sortAndLimitWords(wordFrequencies, maxWords) {
-        wordFrequencies.sort((a, b) => {
-            if (b[1] === a[1]) {
-                return a[0].localeCompare(b[0]);
-            }
-            return b[1] - a[1];
-        });
-        return wordFrequencies.slice(0, maxWords);
+        return wordFrequencies
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+            .slice(0, maxWords);
     }
 
-    function textProcessingPipeline(rawText, maxWords, enableDetailedLogs = false) { // Adicionado parâmetro para logs
-        if(enableDetailedLogs) console.log("--- INÍCIO DO PROCESSAMENTO ---");
-        if(enableDetailedLogs) console.log("1. Texto Original Recebido:", rawText);
-
-        const cleanedText = cleanText(rawText, enableDetailedLogs); // Passa o flag de logs
-        if(enableDetailedLogs) console.log("2. Texto Após Limpeza (Resultado de cleanText):", cleanedText);
-
+    function textProcessingPipeline(rawText, maxWords, enableDetailedLogsCleanText = false) {
+        const cleanedText = cleanText(rawText, enableDetailedLogsCleanText);
         const tokens = tokenizeText(cleanedText);
-        if(enableDetailedLogs) console.log("3. Tokens Após Tokenização (tokenizeText):", tokens);
-
         const currentStopWords = typeof portugueseStopWords !== 'undefined' ? portugueseStopWords : [];
-        if(enableDetailedLogs) console.log("4. Número de Stop Words na Lista Usada:", currentStopWords.length);
-        // Removido log de exemplo de stopwords para diminuir poluição do console em produção
-        
         const filteredTokens = filterStopWords(tokens, currentStopWords);
-        if(enableDetailedLogs) console.log("5. Tokens Após Filtro de Stop Words (filterStopWords):", filteredTokens);
-
         const frequencies = countFrequencies(filteredTokens);
-        if(enableDetailedLogs) console.log("6. Frequências Contadas (countFrequencies):", frequencies);
+        return sortAndLimitWords(frequencies, maxWords);
+    }
 
-        const sortedAndLimitedWords = sortAndLimitWords(frequencies, maxWords);
-        if(enableDetailedLogs) console.log("7. Palavras Finais Para Nuvem (sortAndLimitWords):", sortedAndLimitedWords);
-        if(enableDetailedLogs) console.log("--- FIM DO PROCESSAMENTO ---");
+    function displayFrequencyList(wordArray, topN = 15) {
+        if (!wordFrequencyListElement || !frequencyListSection) return;
 
-        return sortedAndLimitedWords;
+        wordFrequencyListElement.innerHTML = '';
+        if (!wordArray.length) {
+            frequencyListSection.style.display = 'none';
+            return;
+        }
+
+        frequencyListSection.style.display = 'block';
+        const wordsToDisplay = wordArray.slice(0, topN);
+
+        wordsToDisplay.forEach((item, index) => {
+            const [word, count] = item;
+            const listItem = document.createElement('li');
+
+            const rankSpan = document.createElement('span');
+            rankSpan.className = 'rank';
+            rankSpan.textContent = `#${index + 1}`;
+
+            const wordSpan = document.createElement('span');
+            wordSpan.className = 'word';
+            wordSpan.textContent = word;
+
+            const countSpan = document.createElement('span');
+            countSpan.className = 'count';
+            countSpan.textContent = `(${count} ${count === 1 ? 'vez' : 'vezes'})`;
+
+            listItem.appendChild(rankSpan);
+            listItem.appendChild(wordSpan);
+            listItem.appendChild(countSpan);
+            wordFrequencyListElement.appendChild(listItem);
+        });
     }
 
     function renderWordCloud(wordList, paletteKey, font) {
-        currentZoom = 1.0; // Reseta o zoom
-        applyZoom();       // Aplica o zoom resetado visualmente
+        currentZoom = 1.0;
+        applyZoom();
 
-        if (wordCloudContainer.offsetWidth > 0) {
+        if (wordCloudContainer && wordCloudContainer.offsetWidth > 0) {
             wordCloudCanvas.width = wordCloudContainer.offsetWidth;
             wordCloudCanvas.height = wordCloudContainer.clientHeight > 50 ? wordCloudContainer.clientHeight : 400;
         } else {
-            wordCloudCanvas.width = 600; // Fallback
-            wordCloudCanvas.height = 400; // Fallback
+            wordCloudCanvas.width = 600;
+            wordCloudCanvas.height = 400;
         }
 
         const context = wordCloudCanvas.getContext('2d');
+        if (!context) {
+            displayError("Erro ao obter contexto do canvas.");
+            return;
+        }
         context.clearRect(0, 0, wordCloudCanvas.width, wordCloudCanvas.height);
 
         let colorOption;
@@ -265,10 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const options = {
             list: wordList,
             gridSize: Math.max(2, Math.round(12 * wordCloudCanvas.width / 1024)),
-            weightFactor: (size) => {
-                let newSize = Math.pow(size, 0.60) * (wordCloudCanvas.width / 120);
-                return Math.max(4, newSize);
-            },
+            weightFactor: (size) => Math.max(4, Math.pow(size, 0.60) * (wordCloudCanvas.width / 120)),
             fontFamily: font,
             color: colorOption,
             backgroundColor: '#FFFFFF',
@@ -279,8 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
             drawOutOfBound: false,
             shrinkToFit: true,
             hover: (item, dimension, event) => {
-                if (item) {
-                    // event.target.title = item[0] + ': ' + item[1];
+                if (item && event.target) {
+                    event.target.title = `${item[0]} (${item[1]} ${item[1] === 1 ? 'vez' : 'vezes'})`;
                 }
             },
             click: (item, dimension, event) => {
