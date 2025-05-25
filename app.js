@@ -155,7 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return sortAndLimitWords(frequencies, maxWords);
     }
 
-    // ✅ FUNÇÃO FINAL: Exibe a listinha bonita
     function displayFrequencyList(wordArray, topN = 10) {
         if (!wordFrequencyListElement || !frequencyListSection) return;
 
@@ -238,4 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             displayError("Falha ao renderizar a nuvem.");
         }
     }
+
+    // 🔓 Expor a função para testes no console
+    window.displayFrequencyList = displayFrequencyList;
 });
