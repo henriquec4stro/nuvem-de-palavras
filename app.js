@@ -1,5 +1,5 @@
-document.addEventListener('DOMContentLoaded', () = {
-     Seletores do DOM
+document.addEventListener('DOMContentLoaded', () => {
+    // Seletores do DOM
     const textInput = document.getElementById('textInput');
     const maxWordsInput = document.getElementById('maxWords');
     const colorPaletteSelect = document.getElementById('colorPalette');
@@ -8,12 +8,14 @@ document.addEventListener('DOMContentLoaded', () = {
     const wordCloudCanvas = document.getElementById('wordCloudCanvas');
     const loadingIndicator = document.getElementById('loadingIndicator');
     const errorMessageElement = document.getElementById('errorMessage');
+    const wordCloudContainer = document.getElementById('wordCloudContainer');
 
-     Paletas de cores predefinidas
+
+    // Paletas de cores predefinidas
     const colorPalettes = {
-        vibrant ['#ff6f61', '#ffb347', '#fdfd96', '#77dd77', '#aec6cf', '#9b9b9b', '#f7cac9', '#a2d5f2'],
-        pastel ['#fbb4ae', '#b3cde3', '#ccebc5', '#decbe4', '#fed9a6', '#ffffcc', '#e5d8bd', '#fddaec'],
-        grayscale ['#202020', '#404040', '#606060', '#808080', '#A0A0A0', '#C0C0C0', '#E0E0E0']
+        vibrant: ['#ff6f61', '#ffb347', '#fdfd96', '#77dd77', '#aec6cf', '#9b9b9b', '#f7cac9', '#a2d5f2'],
+        pastel: ['#fbb4ae', '#b3cde3', '#ccebc5', '#decbe4', '#fed9a6', '#ffffcc', '#e5d8bd', '#fddaec'],
+        grayscale: ['#202020', '#404040', '#606060', '#808080', '#A0A0A0', '#C0C0C0', '#E0E0E0']
     };
 
     generateButton.addEventListener('click', handleGenerateCloud);
@@ -21,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () = {
     function showLoading(isLoading) {
         if (isLoading) {
             loadingIndicator.style.display = 'block';
-            errorMessageElement.style.display = 'none';  Esconde mensagens de erro ao carregar
+            errorMessageElement.style.display = 'none';
             generateButton.disabled = true;
             textInput.disabled = true;
             maxWordsInput.disabled = true;
@@ -40,24 +42,19 @@ document.addEventListener('DOMContentLoaded', () = {
     function displayError(message) {
         errorMessageElement.textContent = message;
         errorMessageElement.style.display = 'block';
-         Limpar a nuvem de palavras em caso de erro para não mostrar uma antiga
         const context = wordCloudCanvas.getContext('2d');
         context.clearRect(0, 0, wordCloudCanvas.width, wordCloudCanvas.height);
     }
 
     async function ensureFontIsLoaded(fontFamilyString) {
-        const primaryFont = fontFamilyString.split(',').trim().replace([']g, '');
-         Verifica se não é uma fonte genérica padrão
+        const primaryFont = fontFamilyString.split(',')[0].trim().replace(/['"]/g, '');
         const genericFonts = ['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui'];
-        if (!genericFonts.includes(primaryFont.toLowerCase())) {
+        if (primaryFont && !genericFonts.includes(primaryFont.toLowerCase())) {
             try {
-                 Tenta carregar a fonte com um tamanho e texto de amostra
-                await document.fonts.load(`1em ${primaryFont}`);
+                await document.fonts.load(`1em "${primaryFont}"`); // Aspas para fontes com espaços
                 console.log(`Fonte ${primaryFont} carregada ou já disponível.`);
             } catch (err) {
-                console.warn(`Falha ao carregar a fonte ${primaryFont}`, err);
-                 Prosseguir com a fonte de fallback definida no CSS ou pela biblioteca
-                 O usuário pode receber um aviso visual de que a fonte não carregou
+                console.warn(`Falha ao carregar a fonte ${primaryFont}:`, err);
             }
         }
     }
@@ -69,77 +66,72 @@ document.addEventListener('DOMContentLoaded', () = {
         const selectedFont = fontStyleSelect.value;
 
         if (!rawText.trim()) {
-            displayError(Por favor, insira um texto para gerar a nuvem.);
+            displayError("Por favor, insira um texto para gerar a nuvem.");
             return;
         }
-        if (isNaN(maxWords) 
- maxWords = 0) {
-            displayError(Por favor, insira um número válido para o máximo de palavras.);
+        if (isNaN(maxWords) || maxWords <= 0) {
+            displayError("Por favor, insira um número válido para o máximo de palavras.");
             return;
         }
 
         showLoading(true);
         errorMessageElement.style.display = 'none';
 
-         Garante que a fonte selecionada está carregada
         await ensureFontIsLoaded(selectedFont);
 
-         Usar setTimeout para permitir que a UI atualize (mostrar o loading)
-         antes de iniciar o processamento pesado.
-        setTimeout(() = {
+        setTimeout(() => {
             try {
                 const processedWords = textProcessingPipeline(rawText, maxWords);
                 if (processedWords.length === 0) {
-                    displayError(Nenhuma palavra significativa encontrada após o processamento. Tente um texto diferente ou ajuste as configurações.);
+                    displayError("Nenhuma palavra significativa encontrada. Tente um texto diferente.");
                     showLoading(false);
                     return;
                 }
                 renderWordCloud(processedWords, selectedPaletteKey, selectedFont);
             } catch (error) {
-                console.error(Erro ao gerar nuvem, error);
-                displayError(Ocorreu um erro inesperado ao gerar a nuvem. Verifique o console para mais detalhes.);
+                console.error("Erro ao gerar nuvem:", error);
+                displayError("Ocorreu um erro inesperado. Verifique o console.");
             } finally {
                 showLoading(false);
             }
-        }, 50);  Pequeno delay para garantir a atualização da UI
+        }, 50);
     }
 
     function cleanText(text) {
-        let cleanedText = text.toLowerCase();  [5]
-         Regex para remover pontuações, mas tentando preservar hífensapóstrofos intra-palavra e acentos.
-         Remove pontuações no iníciofim de palavras ou isoladas.
-         Mantém letras (incluindo acentuadas p{L}), números (p{N}), espaços (s), hífens e apóstrofos.
-        cleanedText = cleanedText.replace([^p{L}p{N}s'-]+gu, ' ');  [6]
-        cleanedText = cleanedText.replace([0-9]g, '');  Remove números [7, 8]
-        cleanedText = cleanedText.replace(s+g, ' ').trim();  Normaliza espaços múltiplos para um único espaço
+        let cleanedText = text.toLowerCase();
+        cleanedText = cleanedText.replace(/[^\\p{L}\\p{N}\\s'-]+/gu, ' '); // Mantém letras, números, espaços, hífens, apóstrofos
+        cleanedText = cleanedText.replace(/[0-9_]/g, ''); // Remove números e underscores explicitamente
+        cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
         return cleanedText;
     }
 
     function tokenizeText(text) {
-        return text.split(s+).filter(word = word.length  1);  Filtra palavras vazias e com 1 caractere [5]
+        return text.split(/\s+/).filter(word => word.length > 1); // Filtra palavras curtas
     }
 
-    function filterStopWords(tokens, stopWordsList) {  [9]
-        const stopWordsSet = new Set(stopWordsList.map(word = word.toLowerCase()));
-        return tokens.filter(token =!stopWordsSet.has(token.toLowerCase()));
+    function filterStopWords(tokens, stopWordsList) {
+        if (!Array.isArray(stopWordsList)) {
+            console.warn("Lista de stop words não é um array. Nenhuma stop word será filtrada.");
+            return tokens;
+        }
+        const stopWordsSet = new Set(stopWordsList.map(word => word.toLowerCase()));
+        return tokens.filter(token => !stopWordsSet.has(token.toLowerCase()));
     }
 
-    function countFrequencies(tokens) {  [10]
+    function countFrequencies(tokens) {
         const frequencyMap = new Map();
-        tokens.forEach(token = {
-            frequencyMap.set(token, (frequencyMap.get(token) 
- 0) + 1);
+        tokens.forEach(token => {
+            frequencyMap.set(token, (frequencyMap.get(token) || 0) + 1);
         });
-        return Array.from(frequencyMap);  Converte para array de [palavra, frequência]
+        return Array.from(frequencyMap);
     }
 
     function sortAndLimitWords(wordFrequencies, maxWords) {
-         Ordena por frequência (decrescente), depois alfabeticamente como desempate
-        wordFrequencies.sort((a, b) = {
-            if (b[1] === a[1]) {  Se frequências são iguais
-                return a.localeCompare(b);  Ordena alfabeticamente (a é a palavra)
+        wordFrequencies.sort((a, b) => {
+            if (b[1] === a[1]) {
+                return a[0].localeCompare(b[0]);
             }
-            return b[1] - a[1];  Ordena por frequência (b[1] é a frequência)
+            return b[1] - a[1];
         });
         return wordFrequencies.slice(0, maxWords);
     }
@@ -147,81 +139,78 @@ document.addEventListener('DOMContentLoaded', () = {
     function textProcessingPipeline(rawText, maxWords) {
         const cleanedText = cleanText(rawText);
         const tokens = tokenizeText(cleanedText);
-         'portugueseStopWords' é definido em stopwords-pt.js e deve estar globalmente acessível
-        const filteredTokens = filterStopWords(tokens, portugueseStopWords);
+        const currentStopWords = typeof portugueseStopWords !== 'undefined' ? portugueseStopWords : [];
+        const filteredTokens = filterStopWords(tokens, currentStopWords);
         const frequencies = countFrequencies(filteredTokens);
         const sortedAndLimitedWords = sortAndLimitWords(frequencies, maxWords);
         return sortedAndLimitedWords;
     }
 
-    function renderWordCloud(wordList, paletteKey, font) {  [11, 12]
-        const canvasElement = document.getElementById('wordCloudCanvas');
-        const container = document.getElementById('wordCloudContainer');
+    function renderWordCloud(wordList, paletteKey, font) {
+        if (wordCloudContainer.offsetWidth > 0) {
+            wordCloudCanvas.width = wordCloudContainer.offsetWidth;
+            // Para altura, você pode usar uma proporção ou um valor fixo
+            // Ex: wordCloudCanvas.height = wordCloudContainer.offsetWidth * 0.6;
+            // Ou manter a altura definida no CSS através do contêiner
+            wordCloudCanvas.height = wordCloudContainer.clientHeight > 50 ? wordCloudContainer.clientHeight : 400;
+        } else {
+            wordCloudCanvas.width = 600; // Fallback
+            wordCloudCanvas.height = 400; // Fallback
+        }
 
-         Ajustar o tamanho do canvas ao seu container
-         Isso é importante para responsividade e para que wordcloud2.js calcule o layout corretamente
-        canvasElement.width = container.offsetWidth;
-        canvasElement.height = container.offsetHeight;
-
-        const context = canvasElement.getContext('2d');
-        context.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        const context = wordCloudCanvas.getContext('2d');
+        context.clearRect(0, 0, wordCloudCanvas.width, wordCloudCanvas.height);
 
         let colorOption;
-        if (paletteKey === 'random-dark' 
- paletteKey === 'random-light') {
-            colorOption = paletteKey;  Usa as keywords da biblioteca
+        if (paletteKey === 'random-dark' || paletteKey === 'random-light') {
+            colorOption = paletteKey;
         } else if (colorPalettes[paletteKey]) {
             const selectedColors = colorPalettes[paletteKey];
             let colorIndex = 0;
-            colorOption = () = {  Função para ciclar pelas cores [13, 14, 15, 16]
+            colorOption = () => {
                 const color = selectedColors[colorIndex % selectedColors.length];
                 colorIndex++;
                 return color;
             };
         } else {
-            colorOption = 'random-dark';  Paleta padrão de fallback
+            colorOption = 'random-dark';
         }
 
         const options = {
-            list wordList,
-            gridSize Math.max(4, Math.round(16  canvasElement.width  1024)),  Ajusta gridSize, mínimo de 4 [11]
-            weightFactor (size) = {  'size' aqui é a frequência da palavra
-                  Escalonamento para dar mais variação visual aos tamanhos
-                  Math.pow(size, 0.7) ajuda a não ter palavras pequenas demais ou grandes demais
-                  O multiplicador (ex 5) ajusta o tamanho geral.
-                  Este valor pode precisar de ajuste dependendo da faixa de frequências.
-                return Math.pow(size, 0.65)  (canvasElement.width  200);  Ajustado para ser mais responsivo ao tamanho do canvas
+            list: wordList,
+            gridSize: Math.max(2, Math.round(12 * wordCloudCanvas.width / 1024)),
+            weightFactor: (size) => {
+                 // Ajusta o tamanho base e o multiplicador para melhor escala de fonte
+                let newSize = Math.pow(size, 0.60) * (wordCloudCanvas.width / 120);
+                return Math.max(4, newSize); // Garante um tamanho mínimo para as palavras
             },
-            fontFamily font,  [11, 17]
-            color colorOption,  [11, 17]
-            backgroundColor '#FFFFFF',
-            rotateRatio 0.3,  Proporção de palavras rotacionadas [11]
-            rotationSteps 2,  0 ou 90 graus (0  90 ou 1  90)
-            shape 'circle',  Formato padrão, pode ser 'cardioid', 'diamond', etc. [11, 17]
-            minSize Math.max(2, canvasElement.width  150),  Tamanho mínimo da fonte, responsivo [11]
-            drawOutOfBound false,  Não desenha palavras fora da área
-            shrinkToFit true,  Tenta encaixar todas as palavras [11]
-            hover (item, dimension, event) = {  Exemplo de interatividade no hover
+            fontFamily: font,
+            color: colorOption,
+            backgroundColor: '#FFFFFF',
+            rotateRatio: 0.3,
+            rotationSteps: 2, // 0 (horizontal) ou 1 (90 graus). 2 significa uma rotação de 90 graus.
+            shape: 'circle',
+            minSize: Math.max(1, Math.round(wordCloudCanvas.width / 200)), // Tamanho mínimo da fonte
+            drawOutOfBound: false,
+            shrinkToFit: true,
+            hover: (item, dimension, event) => {
                 if (item) {
-                    const hoverBox = document.getElementById('wordCloudCanvas-hover-box');  Se você tiver um elemento para isso
-                    if (hoverBox) {
-                        hoverBox.textContent = `${item} ${item[1]}`;
-                         Posicionar hoverBox perto do cursor (requer mais lógica de posicionamento)
-                    }
+                    // Você pode adicionar uma tooltip customizada aqui se desejar
+                    // Ex: event.target.title = item[0] + ': ' + item[1];
                 }
             },
-             click (item, dimension, event) = {  Exemplo de interatividade no clique [11]
-                 if (item) {
-                     alert(`${item} ${item[1]}`);
-                 }
-             }
+            click: (item, dimension, event) => {
+                if (item) {
+                    alert(`${item[0]} (ocorrências: ${item[1]})`);
+                }
+            }
         };
 
         try {
-            WordCloud(canvasElement, options);  [12]
+            WordCloud2(wordCloudCanvas, options);
         } catch (e) {
-            console.error(Erro na biblioteca WordCloud, e);
-            displayError(Ocorreu um erro ao tentar renderizar a nuvem de palavras com a biblioteca.);
+            console.error("Erro ao renderizar com WordCloud2:", e);
+            displayError("Falha ao renderizar a nuvem. Verifique o console.");
         }
     }
 });
