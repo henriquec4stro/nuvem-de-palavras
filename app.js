@@ -42,8 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayError(message) {
         errorMessageElement.textContent = message;
         errorMessageElement.style.display = 'block';
-        const context = wordCloudCanvas.getContext('2d');
-        context.clearRect(0, 0, wordCloudCanvas.width, wordCloudCanvas.height);
+        // Tenta limpar o canvas apenas se ele já foi usado
+        if (wordCloudCanvas.width > 0 && wordCloudCanvas.height > 0) {
+            const context = wordCloudCanvas.getContext('2d');
+            if (context) {
+                context.clearRect(0, 0, wordCloudCanvas.width, wordCloudCanvas.height);
+            }
+        }
     }
 
     async function ensureFontIsLoaded(fontFamilyString) {
@@ -52,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (primaryFont && !genericFonts.includes(primaryFont.toLowerCase())) {
             try {
                 await document.fonts.load(`1em "${primaryFont}"`); // Aspas para fontes com espaços
-                console.log(`Fonte ${primaryFont} carregada ou já disponível.`);
+                // console.log(`Fonte ${primaryFont} carregada ou já disponível.`); // Log Opcional
             } catch (err) {
                 console.warn(`Falha ao carregar a fonte ${primaryFont}:`, err);
             }
@@ -84,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const processedWords = textProcessingPipeline(rawText, maxWords);
                 if (processedWords.length === 0) {
                     displayError("Nenhuma palavra significativa encontrada. Tente um texto diferente.");
-                    showLoading(false);
+                    showLoading(false); // Certifique-se de que o loading é desativado aqui
                     return;
                 }
                 renderWordCloud(processedWords, selectedPaletteKey, selectedFont);
@@ -92,12 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Erro ao gerar nuvem:", error);
                 displayError("Ocorreu um erro inesperado. Verifique o console.");
             } finally {
-                showLoading(false);
+                showLoading(false); // Garante que o loading é desativado
             }
         }, 50);
     }
 
-    // Função cleanText MODIFICADA com console.log detalhados:
+    // Função cleanText COM console.log detalhados para depuração:
     function cleanText(text) {
         console.log("  >> cleanText - Texto Original para Limpeza:", text);
         let cleanedText = text.toLowerCase();
@@ -109,7 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
         cleanedText = cleanedText.replace(regexKeepChars, ' ');
         console.log("  >> cleanText - Após 1º replace (manter p{L},p{N},s,'-):", cleanedText);
 
-        // Regex para REMOVER explicitamente dígitos e underscores, caso necessário.
+        // Regex para REMOVER explicitamente dígitos e underscores.
+        // A remoção de números já deveria ser coberta por \p{N} no regexKeepChars se quisermos mantê-los.
+        // Se a intenção é SEMPRE remover números, esta linha é correta.
+        // Se quisermos manter números como parte das palavras (ex: "word2vec"), esta linha deve ser removida
+        // e o regexKeepChars já lida com \p{N} (números Unicode).
+        // Por enquanto, vamos manter como estava no seu código original (removendo números aqui).
         const regexRemoveDigitsUnderscores = /[0-9_]/g;
         cleanedText = cleanedText.replace(regexRemoveDigitsUnderscores, '');
         console.log("  >> cleanText - Após 2º replace (remover [0-9_]):", cleanedText);
@@ -121,7 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function tokenizeText(text) {
-        return text.split(/\s+/).filter(word => word.length > 1); // Filtra palavras curtas
+        // Filtra palavras vazias que podem surgir do split e palavras com 1 caractere.
+        return text.split(/\s+/).filter(word => word && word.length > 1);
     }
 
     function filterStopWords(tokens, stopWordsList) {
@@ -151,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return wordFrequencies.slice(0, maxWords);
     }
 
-    // Função com console.log para depuração (mantida da sua versão anterior):
+    // Função textProcessingPipeline com console.log para depuração:
     function textProcessingPipeline(rawText, maxWords) {
         console.log("--- INÍCIO DO PROCESSAMENTO ---");
         console.log("1. Texto Original Recebido:", rawText);
@@ -239,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            WordCloud(wordCloudCanvas, options); // Mantive WordCloud (sem o 2) conforme nossa última correção
+            WordCloud(wordCloudCanvas, options);
         } catch (e) {
             console.error("Erro ao renderizar com WordCloud:", e);
             displayError("Falha ao renderizar a nuvem. Verifique o console.");
