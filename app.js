@@ -97,11 +97,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     }
 
+    // Função cleanText MODIFICADA com console.log detalhados:
     function cleanText(text) {
+        console.log("  >> cleanText - Texto Original para Limpeza:", text);
         let cleanedText = text.toLowerCase();
-        cleanedText = cleanedText.replace(/[^\\p{L}\\p{N}\\s'-]+/gu, ' '); // Mantém letras, números, espaços, hífens, apóstrofos
-        cleanedText = cleanedText.replace(/[0-9_]/g, ''); // Remove números e underscores explicitamente
+        console.log("  >> cleanText - Após toLowerCase:", cleanedText);
+
+        // Regex para MANTER letras Unicode (incluindo acentuadas), números Unicode, espaços, hífens e apóstrofos.
+        // E REMOVER todo o resto, substituindo por espaço.
+        const regexKeepChars = /[^\\p{L}\\p{N}\\s'-]+/gu; // O 'u' é para Unicode
+        cleanedText = cleanedText.replace(regexKeepChars, ' ');
+        console.log("  >> cleanText - Após 1º replace (manter p{L},p{N},s,'-):", cleanedText);
+
+        // Regex para REMOVER explicitamente dígitos e underscores, caso necessário.
+        const regexRemoveDigitsUnderscores = /[0-9_]/g;
+        cleanedText = cleanedText.replace(regexRemoveDigitsUnderscores, '');
+        console.log("  >> cleanText - Após 2º replace (remover [0-9_]):", cleanedText);
+
+        // Normaliza espaços múltiplos para um único espaço e remove espaços no início/fim.
         cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
+        console.log("  >> cleanText - Após normalizar espaços e trim (Resultado Final da Limpeza):", cleanedText);
         return cleanedText;
     }
 
@@ -141,8 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("--- INÍCIO DO PROCESSAMENTO ---");
         console.log("1. Texto Original Recebido:", rawText);
 
-        const cleanedText = cleanText(rawText);
-        console.log("2. Texto Após Limpeza (cleanText):", cleanedText);
+        const cleanedText = cleanText(rawText); // Esta cleanText agora tem logs internos
+        console.log("2. Texto Após Limpeza (Resultado de cleanText):", cleanedText); // Log do resultado geral de cleanText
 
         const tokens = tokenizeText(cleanedText);
         console.log("3. Tokens Após Tokenização (tokenizeText):", tokens);
@@ -224,10 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            // AQUI ESTÁ A ALTERAÇÃO PRINCIPAL:
-            WordCloud(wordCloudCanvas, options); // Mudado de WordCloud2 para WordCloud
+            WordCloud(wordCloudCanvas, options); // Mantive WordCloud (sem o 2) conforme nossa última correção
         } catch (e) {
-            console.error("Erro ao renderizar com WordCloud:", e); // Mudei a msg de erro tbm
+            console.error("Erro ao renderizar com WordCloud:", e);
             displayError("Falha ao renderizar a nuvem. Verifique o console.");
         }
     }
