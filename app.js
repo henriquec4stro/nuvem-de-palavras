@@ -5,7 +5,6 @@ const MIN_ZOOM = 0.3;
 const MAX_ZOOM = 3.0;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Seletores do DOM
     const textInput = document.getElementById('textInput');
     const maxWordsInput = document.getElementById('maxWords');
     const colorPaletteSelect = document.getElementById('colorPalette');
@@ -16,16 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessageElement = document.getElementById('errorMessage');
     const wordCloudContainer = document.getElementById('wordCloudContainer');
 
-    // Seletores para botões de zoom
     const zoomInButton = document.getElementById('zoomInButton');
     const zoomOutButton = document.getElementById('zoomOutButton');
     const zoomResetButton = document.getElementById('zoomResetButton');
 
-    // Lista de frequência
     const frequencyListSection = document.getElementById('frequencyListSection');
-    const wordFrequencyListElement = document.getElementById('wordFrequencyList');
+    const wordFrequencyListElement = document.getElementById('wordFrequencyGrid');
 
-    // Paletas de cores predefinidas
     const colorPalettes = {
         vibrant: ['#ff6f61', '#ffb347', '#fdfd96', '#77dd77', '#aec6cf', '#9b9b9b', '#f7cac9', '#a2d5f2'],
         pastel: ['#fbb4ae', '#b3cde3', '#ccebc5', '#decbe4', '#fed9a6', '#ffffcc', '#e5d8bd', '#fddaec'],
@@ -33,44 +29,33 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function applyZoom() {
-        if (wordCloudCanvas) {
-            wordCloudCanvas.style.transform = `scale(${currentZoom})`;
-        }
+        wordCloudCanvas.style.transform = `scale(${currentZoom})`;
     }
 
-    if (zoomInButton) {
-        zoomInButton.addEventListener('click', () => {
-            if (currentZoom < MAX_ZOOM) {
-                currentZoom = parseFloat((currentZoom + ZOOM_STEP).toFixed(2));
-                if (currentZoom > MAX_ZOOM) currentZoom = MAX_ZOOM;
-                applyZoom();
-            }
-        });
-    }
-
-    if (zoomOutButton) {
-        zoomOutButton.addEventListener('click', () => {
-            if (currentZoom > MIN_ZOOM) {
-                currentZoom = parseFloat((currentZoom - ZOOM_STEP).toFixed(2));
-                if (currentZoom < MIN_ZOOM) currentZoom = MIN_ZOOM;
-                applyZoom();
-            }
-        });
-    }
-
-    if (zoomResetButton) {
-        zoomResetButton.addEventListener('click', () => {
-            currentZoom = 1.0;
+    zoomInButton?.addEventListener('click', () => {
+        if (currentZoom < MAX_ZOOM) {
+            currentZoom = Math.min(currentZoom + ZOOM_STEP, MAX_ZOOM);
             applyZoom();
-        });
-    }
+        }
+    });
+
+    zoomOutButton?.addEventListener('click', () => {
+        if (currentZoom > MIN_ZOOM) {
+            currentZoom = Math.max(currentZoom - ZOOM_STEP, MIN_ZOOM);
+            applyZoom();
+        }
+    });
+
+    zoomResetButton?.addEventListener('click', () => {
+        currentZoom = 1.0;
+        applyZoom();
+    });
 
     function showLoading(isLoading) {
         loadingIndicator.style.display = isLoading ? 'block' : 'none';
         errorMessageElement.style.display = 'none';
-        if (frequencyListSection) frequencyListSection.style.display = 'none';
-        const disabled = isLoading;
-        [generateButton, textInput, maxWordsInput, colorPaletteSelect, fontStyleSelect].forEach(el => el.disabled = disabled);
+        frequencyListSection.style.display = 'none';
+        [generateButton, textInput, maxWordsInput, colorPaletteSelect, fontStyleSelect].forEach(el => el.disabled = isLoading);
     }
 
     function displayError(message) {
@@ -80,8 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
         applyZoom();
         const context = wordCloudCanvas.getContext('2d');
         if (context) context.clearRect(0, 0, wordCloudCanvas.width, wordCloudCanvas.height);
-        if (wordFrequencyListElement) wordFrequencyListElement.innerHTML = '';
-        if (frequencyListSection) frequencyListSection.style.display = 'none';
+        wordFrequencyListElement.innerHTML = '';
+        frequencyListSection.style.display = 'none';
     }
 
     async function ensureFontIsLoaded(fontFamilyString) {
@@ -114,9 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         showLoading(true);
-
         await ensureFontIsLoaded(selectedFont);
-        await new Promise(resolve => setTimeout(resolve, 50)); // delay artificial para UX
+        await new Promise(resolve => setTimeout(resolve, 50));
 
         try {
             const processedWords = textProcessingPipeline(rawText, maxWords, false);
@@ -127,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             renderWordCloud(processedWords, selectedPaletteKey, selectedFont);
-            displayFrequencyList(processedWords, 15);
+            displayFrequencyList(processedWords, 10);
 
         } catch (error) {
             console.error("Erro ao gerar nuvem:", error);
@@ -177,38 +161,29 @@ document.addEventListener('DOMContentLoaded', () => {
         return sortAndLimitWords(frequencies, maxWords);
     }
 
-    function displayFrequencyList(wordArray, topN = 15) {
-        if (!wordFrequencyListElement || !frequencyListSection) return;
+    // ✅ NOVA FUNÇÃO: Exibe palavras em formato de cartões
+    function displayFrequencyList(wordArray, topN = 10) {
+        const container = document.getElementById('wordFrequencyGrid');
+        const section = document.getElementById('frequencyListSection');
 
-        wordFrequencyListElement.innerHTML = '';
-        if (!wordArray.length) {
-            frequencyListSection.style.display = 'none';
-            return;
-        }
+        if (!container || !section) return;
 
-        frequencyListSection.style.display = 'block';
-        const wordsToDisplay = wordArray.slice(0, topN);
+        container.innerHTML = '';
+        section.style.display = 'block';
 
-        wordsToDisplay.forEach((item, index) => {
-            const [word, count] = item;
-            const listItem = document.createElement('li');
+        const topWords = wordArray.slice(0, topN);
 
-            const rankSpan = document.createElement('span');
-            rankSpan.className = 'rank';
-            rankSpan.textContent = `#${index + 1}`;
+        topWords.forEach(([word, count], index) => {
+            const card = document.createElement('div');
+            card.className = 'word-card';
 
-            const wordSpan = document.createElement('span');
-            wordSpan.className = 'word';
-            wordSpan.textContent = word;
+            card.innerHTML = `
+                <div class="word">${word}</div>
+                <div class="count">${count} ${count === 1 ? 'vez' : 'vezes'}</div>
+                <div class="rank">#${index + 1}</div>
+            `;
 
-            const countSpan = document.createElement('span');
-            countSpan.className = 'count';
-            countSpan.textContent = `(${count} ${count === 1 ? 'vez' : 'vezes'})`;
-
-            listItem.appendChild(rankSpan);
-            listItem.appendChild(wordSpan);
-            listItem.appendChild(countSpan);
-            wordFrequencyListElement.appendChild(listItem);
+            container.appendChild(card);
         });
     }
 
