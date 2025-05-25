@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         applyZoom();
 
         wordCloudCanvas.width = wordCloudContainer.offsetWidth || 600;
-        wordCloudCanvas.height = wordCloudContainer.clientHeight > 50 ? wordCloudContainer.clientHeight : 700;
+        wordCloudCanvas.height = wordCloudContainer.clientHeight > 50 ? wordCloudContainer.clientHeight : 1000;
 
         const context = wordCloudCanvas.getContext('2d');
         if (!context) {
