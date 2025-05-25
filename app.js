@@ -159,13 +159,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!wordFrequencyListElement || !frequencyListSection) return;
 
         wordFrequencyListElement.innerHTML = '';
+
         if (!wordArray || wordArray.length === 0) {
             frequencyListSection.style.display = 'none';
             return;
         }
 
-        // ✅ CORREÇÃO AQUI
-        frequencyListSection.style.removeProperty('display');
+        // ✅ Garantir que a seção de frequência esteja visível
+        frequencyListSection.style.display = 'block';
 
         const topWords = wordArray.slice(0, topN);
 
