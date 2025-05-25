@@ -114,8 +114,8 @@ button#generateCloudButton:disabled {
 
 #wordCloudContainer {
     width: 100%;
-    min-height: 600px;
-    height: 700px;
+    min-height: 1000px;
+    height: 1000px;
     border: 1px dashed #ccc;
     box-sizing: border-box;
     position: relative;
@@ -234,8 +234,8 @@ footer {
     }
 
     #wordCloudContainer {
-        height: 500px;
-        min-height: 400px;
+        height: 800px;
+        min-height: 600px;
     }
 
     header h1 {
