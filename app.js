@@ -102,33 +102,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     }
 
-    // Função cleanText COM console.log detalhados para depuração:
+    // Função cleanText ATUALIZADA com regex mais simples e logs detalhados:
     function cleanText(text) {
         console.log("  >> cleanText - Texto Original para Limpeza:", text);
         let cleanedText = text.toLowerCase();
         console.log("  >> cleanText - Após toLowerCase:", cleanedText);
 
-        // Regex para MANTER letras Unicode (incluindo acentuadas), números Unicode, espaços, hífens e apóstrofos.
-        // E REMOVER todo o resto, substituindo por espaço.
-        const regexKeepChars = /[^\\p{L}\\p{N}\\s'-]+/gu; // O 'u' é para Unicode
-        cleanedText = cleanedText.replace(regexKeepChars, ' ');
-        console.log("  >> cleanText - Após 1º replace (manter p{L},p{N},s,'-):", cleanedText);
+        // Regex MAIS SIMPLES: Remove tudo que NÃO for letra (a-z, e acentuadas comuns),
+        // número (0-9), espaço, apóstrofo ou hífen.
+        // Esta lista de acentuadas pode ser expandida se necessário.
+        const regexKeepBasicChars = /[^a-z0-9\s'\-àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ]+/g;
+        cleanedText = cleanedText.replace(regexKeepBasicChars, ' ');
+        console.log("  >> cleanText - Após 1º replace (regexKeepBasicChars):", cleanedText);
 
-        // Regex para REMOVER explicitamente dígitos e underscores.
-        // A remoção de números já deveria ser coberta por \p{N} no regexKeepChars se quisermos mantê-los.
-        // Se a intenção é SEMPRE remover números, esta linha é correta.
-        // Se quisermos manter números como parte das palavras (ex: "word2vec"), esta linha deve ser removida
-        // e o regexKeepChars já lida com \p{N} (números Unicode).
-        // Por enquanto, vamos manter como estava no seu código original (removendo números aqui).
-        const regexRemoveDigitsUnderscores = /[0-9_]/g;
-        cleanedText = cleanedText.replace(regexRemoveDigitsUnderscores, '');
-        console.log("  >> cleanText - Após 2º replace (remover [0-9_]):", cleanedText);
+        // A segunda substituição para remover números.
+        // Se você quiser MANTER números como parte das palavras (ex: "ano2025"),
+        // comente ou remova a linha abaixo, pois o regexKeepBasicChars já os manteria.
+        // Se a intenção é SEMPRE remover números isolados ou como parte de "não-palavras",
+        // esta linha ajuda a garantir isso.
+        const regexRemoveDigits = /[0-9]+/g; // Remove sequências de dígitos
+        cleanedText = cleanedText.replace(regexRemoveDigits, '');
+        console.log("  >> cleanText - Após 2º replace (remover [0-9]):", cleanedText);
 
         // Normaliza espaços múltiplos para um único espaço e remove espaços no início/fim.
         cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
         console.log("  >> cleanText - Após normalizar espaços e trim (Resultado Final da Limpeza):", cleanedText);
         return cleanedText;
     }
+
 
     function tokenizeText(text) {
         // Filtra palavras vazias que podem surgir do split e palavras com 1 caractere.
@@ -250,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            WordCloud(wordCloudCanvas, options);
+            WordCloud(wordCloudCanvas, options); // Chamada correta para a biblioteca
         } catch (e) {
             console.error("Erro ao renderizar com WordCloud:", e);
             displayError("Falha ao renderizar a nuvem. Verifique o console.");
