@@ -46,11 +46,9 @@ main#appContainer {
     gap: 20px;
 }
 
-#inputControlsSection section {
-    margin-bottom: 20px;
-}
-
-#inputControlsSection h2 {
+#inputControlsSection h2,
+#outputSection h2,
+#frequencyListSection h3 {
     margin-top: 0;
     color: #333;
     border-bottom: 2px solid #eee;
@@ -114,15 +112,6 @@ button#generateCloudButton:disabled {
     flex-direction: column;
 }
 
-#outputSection h2 {
-    margin-top: 0;
-    color: #333;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    font-size: 1.5rem;
-    text-align: center;
-}
-
 #wordCloudContainer {
     width: 100%;
     min-height: 450px;
@@ -158,6 +147,7 @@ button#generateCloudButton:disabled {
     margin-bottom: 15px;
     text-align: center;
 }
+
 #zoomControls button {
     padding: 8px 12px;
     margin: 0 5px;
@@ -168,23 +158,16 @@ button#generateCloudButton:disabled {
     border-radius: 4px;
     min-width: 40px;
 }
+
 #zoomControls button:hover {
     background-color: #e9e9e9;
 }
 
-/* NOVO ESTILO — Estatísticas em Cartões (grid) */
+/* Seção de Frequência */
 #frequencyListSection {
     margin-top: 30px;
     padding-top: 20px;
     border-top: 1px solid #eee;
-}
-
-#frequencyListSection h3 {
-    font-size: 1.3em;
-    color: #444;
-    margin-top: 0;
-    margin-bottom: 10px;
-    text-align: center;
 }
 
 #frequencyListSection p {
@@ -205,7 +188,7 @@ button#generateCloudButton:disabled {
     padding: 20px;
     border-radius: 12px;
     text-align: center;
-    box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
     font-family: 'Segoe UI', sans-serif;
 }
 
