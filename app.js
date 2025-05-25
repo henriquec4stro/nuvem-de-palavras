@@ -117,9 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // A segunda substituição para remover números.
         // Se você quiser MANTER números como parte das palavras (ex: "ano2025"),
-        // comente ou remova a linha abaixo, pois o regexKeepBasicChars já os manteria.
-        // Se a intenção é SEMPRE remover números isolados ou como parte de "não-palavras",
-        // esta linha ajuda a garantir isso.
+        // comente ou remova a linha abaixo, pois o regexKeepBasicChars já os manteria (pois ele inclui 0-9).
+        // Se a intenção é SEMPRE remover números, esta linha garante isso.
         const regexRemoveDigits = /[0-9]+/g; // Remove sequências de dígitos
         cleanedText = cleanedText.replace(regexRemoveDigits, '');
         console.log("  >> cleanText - Após 2º replace (remover [0-9]):", cleanedText);
@@ -168,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("--- INÍCIO DO PROCESSAMENTO ---");
         console.log("1. Texto Original Recebido:", rawText);
 
-        const cleanedText = cleanText(rawText); // Esta cleanText agora tem logs internos
+        const cleanedText = cleanText(rawText); // Esta cleanText agora tem os logs internos corretos
         console.log("2. Texto Após Limpeza (Resultado de cleanText):", cleanedText); // Log do resultado geral de cleanText
 
         const tokens = tokenizeText(cleanedText);
