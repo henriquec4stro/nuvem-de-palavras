@@ -136,9 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return wordFrequencies.slice(0, maxWords);
     }
 
-    // Função MODIFICADA com console.log para depuração:
+    // Função com console.log para depuração (mantida da sua versão anterior):
     function textProcessingPipeline(rawText, maxWords) {
-        console.log("--- INÍCIO DO PROCESSAMENTO ---"); // Linha de início para clareza
+        console.log("--- INÍCIO DO PROCESSAMENTO ---");
         console.log("1. Texto Original Recebido:", rawText);
 
         const cleanedText = cleanText(rawText);
@@ -147,16 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const tokens = tokenizeText(cleanedText);
         console.log("3. Tokens Após Tokenização (tokenizeText):", tokens);
 
-        // Tenta pegar a lista de stopwords. Se não existir, usa uma lista vazia.
         const currentStopWords = typeof portugueseStopWords !== 'undefined' ? portugueseStopWords : [];
-        // Mostra apenas o número de stopwords para não poluir o console se a lista for grande
         console.log("4. Número de Stop Words na Lista Usada:", currentStopWords.length);
-        if (currentStopWords.length > 0 && currentStopWords.length <= 20) { // Mostra algumas se a lista for pequena
+        if (currentStopWords.length > 0 && currentStopWords.length <= 20) {
             console.log("   (Exemplo de Stop Words:", currentStopWords.slice(0, 10).join(", ") + "...)");
         } else if (currentStopWords.length > 20) {
             console.log("   (A lista de stop words tem mais de 20 palavras, não será exibida completamente aqui)");
         }
-
 
         const filteredTokens = filterStopWords(tokens, currentStopWords);
         console.log("5. Tokens Após Filtro de Stop Words (filterStopWords):", filteredTokens);
@@ -166,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const sortedAndLimitedWords = sortAndLimitWords(frequencies, maxWords);
         console.log("7. Palavras Finais Para Nuvem (sortAndLimitWords):", sortedAndLimitedWords);
-        console.log("--- FIM DO PROCESSAMENTO ---"); // Linha de fim para clareza
+        console.log("--- FIM DO PROCESSAMENTO ---");
 
         return sortedAndLimitedWords;
     }
@@ -216,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
             shrinkToFit: true,
             hover: (item, dimension, event) => {
                 if (item) {
-                    // event.target.title = item[0] + ': ' + item[1]; // Exemplo de tooltip nativa
+                    // event.target.title = item[0] + ': ' + item[1];
                 }
             },
             click: (item, dimension, event) => {
@@ -227,9 +224,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
-            WordCloud2(wordCloudCanvas, options);
+            // AQUI ESTÁ A ALTERAÇÃO PRINCIPAL:
+            WordCloud(wordCloudCanvas, options); // Mudado de WordCloud2 para WordCloud
         } catch (e) {
-            console.error("Erro ao renderizar com WordCloud2:", e);
+            console.error("Erro ao renderizar com WordCloud:", e); // Mudei a msg de erro tbm
             displayError("Falha ao renderizar a nuvem. Verifique o console.");
         }
     }
