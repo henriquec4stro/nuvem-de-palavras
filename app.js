@@ -1,5 +1,5 @@
 // Variáveis de Zoom Globais
-let currentZoom = 1.0;
+let currentZoom = 2.0;
 const ZOOM_STEP = 0.15;
 const MIN_ZOOM = 0.3;
 const MAX_ZOOM = 3.0;
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     zoomResetButton?.addEventListener('click', () => {
-        currentZoom = 1.0;
+        currentZoom = 2.0;
         applyZoom();
     });
 
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function displayError(message) {
         errorMessageElement.textContent = message;
         errorMessageElement.style.display = 'block';
-        currentZoom = 1.0;
+        currentZoom = 2.0;
         applyZoom();
         const context = wordCloudCanvas.getContext('2d');
         if (context) context.clearRect(0, 0, wordCloudCanvas.width, wordCloudCanvas.height);
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderWordCloud(wordList, paletteKey, font) {
-        currentZoom = 1.0;
+        currentZoom = 2.0;
         applyZoom();
 
         wordCloudCanvas.width = wordCloudContainer.offsetWidth || 600;
