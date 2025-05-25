@@ -136,22 +136,44 @@ document.addEventListener('DOMContentLoaded', () => {
         return wordFrequencies.slice(0, maxWords);
     }
 
+    // Função MODIFICADA com console.log para depuração:
     function textProcessingPipeline(rawText, maxWords) {
+        console.log("--- INÍCIO DO PROCESSAMENTO ---"); // Linha de início para clareza
+        console.log("1. Texto Original Recebido:", rawText);
+
         const cleanedText = cleanText(rawText);
+        console.log("2. Texto Após Limpeza (cleanText):", cleanedText);
+
         const tokens = tokenizeText(cleanedText);
+        console.log("3. Tokens Após Tokenização (tokenizeText):", tokens);
+
+        // Tenta pegar a lista de stopwords. Se não existir, usa uma lista vazia.
         const currentStopWords = typeof portugueseStopWords !== 'undefined' ? portugueseStopWords : [];
+        // Mostra apenas o número de stopwords para não poluir o console se a lista for grande
+        console.log("4. Número de Stop Words na Lista Usada:", currentStopWords.length);
+        if (currentStopWords.length > 0 && currentStopWords.length <= 20) { // Mostra algumas se a lista for pequena
+            console.log("   (Exemplo de Stop Words:", currentStopWords.slice(0, 10).join(", ") + "...)");
+        } else if (currentStopWords.length > 20) {
+            console.log("   (A lista de stop words tem mais de 20 palavras, não será exibida completamente aqui)");
+        }
+
+
         const filteredTokens = filterStopWords(tokens, currentStopWords);
+        console.log("5. Tokens Após Filtro de Stop Words (filterStopWords):", filteredTokens);
+
         const frequencies = countFrequencies(filteredTokens);
+        console.log("6. Frequências Contadas (countFrequencies):", frequencies);
+
         const sortedAndLimitedWords = sortAndLimitWords(frequencies, maxWords);
+        console.log("7. Palavras Finais Para Nuvem (sortAndLimitWords):", sortedAndLimitedWords);
+        console.log("--- FIM DO PROCESSAMENTO ---"); // Linha de fim para clareza
+
         return sortedAndLimitedWords;
     }
 
     function renderWordCloud(wordList, paletteKey, font) {
         if (wordCloudContainer.offsetWidth > 0) {
             wordCloudCanvas.width = wordCloudContainer.offsetWidth;
-            // Para altura, você pode usar uma proporção ou um valor fixo
-            // Ex: wordCloudCanvas.height = wordCloudContainer.offsetWidth * 0.6;
-            // Ou manter a altura definida no CSS através do contêiner
             wordCloudCanvas.height = wordCloudContainer.clientHeight > 50 ? wordCloudContainer.clientHeight : 400;
         } else {
             wordCloudCanvas.width = 600; // Fallback
@@ -180,23 +202,21 @@ document.addEventListener('DOMContentLoaded', () => {
             list: wordList,
             gridSize: Math.max(2, Math.round(12 * wordCloudCanvas.width / 1024)),
             weightFactor: (size) => {
-                 // Ajusta o tamanho base e o multiplicador para melhor escala de fonte
                 let newSize = Math.pow(size, 0.60) * (wordCloudCanvas.width / 120);
-                return Math.max(4, newSize); // Garante um tamanho mínimo para as palavras
+                return Math.max(4, newSize);
             },
             fontFamily: font,
             color: colorOption,
             backgroundColor: '#FFFFFF',
             rotateRatio: 0.3,
-            rotationSteps: 2, // 0 (horizontal) ou 1 (90 graus). 2 significa uma rotação de 90 graus.
+            rotationSteps: 2,
             shape: 'circle',
-            minSize: Math.max(1, Math.round(wordCloudCanvas.width / 200)), // Tamanho mínimo da fonte
+            minSize: Math.max(1, Math.round(wordCloudCanvas.width / 200)),
             drawOutOfBound: false,
             shrinkToFit: true,
             hover: (item, dimension, event) => {
                 if (item) {
-                    // Você pode adicionar uma tooltip customizada aqui se desejar
-                    // Ex: event.target.title = item[0] + ': ' + item[1];
+                    // event.target.title = item[0] + ': ' + item[1]; // Exemplo de tooltip nativa
                 }
             },
             click: (item, dimension, event) => {
