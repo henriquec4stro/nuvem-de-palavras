@@ -155,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return sortAndLimitWords(frequencies, maxWords);
     }
 
+    // ✅ FUNÇÃO FINAL: Exibe a listinha bonita
     function displayFrequencyList(wordArray, topN = 10) {
         if (!wordFrequencyListElement || !frequencyListSection) return;
 
@@ -165,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         frequencyListSection.style.display = 'block';
+
         const topWords = wordArray.slice(0, topN);
 
         topWords.forEach(([word, count], index) => {
