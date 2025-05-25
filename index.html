@@ -37,11 +37,11 @@
                 <div>
                     <label for="fontStyle">Estilo da Fonte:</label>
                     <select id="fontStyle">
-                        <option value="Arial, sans-serif" style="font-family: Arial, sans-serif;">Arial</option>
-                        <option value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif;">Times New Roman</option>
-                        <option value="Verdana, sans-serif" style="font-family: Verdana, sans-serif;">Verdana</option>
-                        <option value="'Courier New', monospace" style="font-family: 'Courier New', monospace;">Courier New</option>
-                        <option value="Georgia, serif" style="font-family: Georgia, serif;">Georgia</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="Georgia, serif">Georgia</option>
                     </select>
                 </div>
             </section>
@@ -53,32 +53,29 @@
 
         <section id="outputSection" aria-labelledby="outputSectionLabel">
             <h2 id="outputSectionLabel">Sua Nuvem de Palavras:</h2>
-            
-            <div id="zoomControls" style="text-align: center; margin-bottom: 10px;">
-                <button id="zoomInButton" title="Aumentar Zoom">+</button>
-                <button id="zoomOutButton" title="Diminuir Zoom">-</button>
-                <button id="zoomResetButton" title="Resetar Zoom">Reset</button>
+
+            <div id="zoomControls">
+                <button id="zoomInButton">+</button>
+                <button id="zoomOutButton">-</button>
+                <button id="zoomResetButton">Reset</button>
             </div>
 
-            <div id="loadingIndicator" style="display: none;">Gerando nuvem, por favor aguarde...</div>
+            <div id="loadingIndicator" style="display: none;">Gerando nuvem...</div>
             <div id="errorMessage" style="display: none; color: red;"></div>
             <div id="wordCloudContainer">
                 <canvas id="wordCloudCanvas"></canvas>
             </div>
 
-            <!-- NOVA SEÇÃO PARA LISTA DE FREQUÊNCIA -->
-            <section id="frequencyListSection" aria-labelledby="frequencyListLabel" style="display: none;">
-                <h3 id="frequencyListLabel">📊 Estatísticas das Palavras</h3>
+            <section id="frequencyListSection" style="display: none;">
+                <h3>📊 Estatísticas das Palavras</h3>
                 <p>Frequência das 10 palavras mais comuns</p>
                 <div id="wordFrequencyGrid" class="frequency-grid"></div>
             </section>
-            <!-- FIM DA NOVA SEÇÃO -->
         </section>
     </main>
     <footer>
         <p>&copy; 2025 Gerador de Nuvem de Palavras</p>
     </footer>
-
     <script src="wordcloud2.js"></script>
     <script src="stopwords-pt.js"></script>
     <script src="app.js"></script>
