@@ -50,6 +50,11 @@ main#appContainer {
     margin-bottom: 20px;
 }
 
+#inputControlsSection section:last-child {
+    margin-bottom: 0; 
+}
+
+
 #inputControlsSection h2 {
     margin-top: 0;
     color: #333;
@@ -67,16 +72,16 @@ label {
 textarea,
 input[type="number"],
 select {
-    width: calc(100% - 20px); /* Desconta padding */
+    width: 100%; 
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    box-sizing: border-box; /* Garante que padding não aumente a largura total */
+    box-sizing: border-box; 
 }
 
 textarea {
-    resize: vertical; /* Permite redimensionamento vertical */
+    resize: vertical;
     min-height: 100px;
 }
 
@@ -108,8 +113,8 @@ button#generateCloudButton:disabled {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    flex: 2; /* Ocupa mais espaço que os controles */
-    min-width: 300px; /* Largura mínima */
+    flex: 2; 
+    min-width: 300px; 
     display: flex;
     flex-direction: column;
 }
@@ -124,17 +129,21 @@ button#generateCloudButton:disabled {
 
 #wordCloudContainer {
     width: 100%;
-    min-height: 300px; /* Altura mínima para o canvas */
-    height: 50vh; /* Altura relativa à viewport, ajuste conforme necessário */
+    min-height: 450px;    /* AUMENTADO */
+    height: 600px;        /* AUMENTADO e fixado (ou use vh se preferir responsividade à altura da tela) */
     border: 1px dashed #ccc;
     box-sizing: border-box;
-    position: relative; /* Para posicionamento de elementos filhos, se necessário */
+    position: relative;
+    overflow: auto;      /* IMPORTANTE PARA ZOOM */
 }
 
 #wordCloudCanvas {
-    display: block; /* Remove espaço extra abaixo do canvas */
-    max-width: 100%;
-    max-height: 100%;
+    display: block;
+    /* max-width e max-height podem ser removidos se o overflow do container lida com o tamanho */
+    /* max-width: 100%; */
+    /* max-height: 100%; */
+    transform-origin: center center; /* Ponto de origem do zoom */
+    transition: transform 0.2s ease-out; /* Transição suave para o zoom */
 }
 
 #loadingIndicator {
@@ -151,25 +160,55 @@ button#generateCloudButton:disabled {
     color: #721c24;
 }
 
+/* Estilos para os controles de zoom */
+#zoomControls {
+    margin-bottom: 15px; /* Adicionado para espaçamento */
+    text-align: center;
+}
+#zoomControls button {
+    padding: 8px 12px;
+    margin: 0 5px;
+    font-size: 1em; /* Reduzido um pouco para não serem tão grandes */
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    min-width: 40px; /* Largura mínima para botões de + e - */
+}
+
+#zoomControls button:hover {
+    background-color: #e9e9e9;
+}
+
+
 footer {
     text-align: center;
     padding: 15px;
     background-color: #333;
     color: white;
-    margin-top: auto; /* Empurra o rodapé para baixo */
+    margin-top: auto;
 }
 
 /* Responsividade */
 @media (max-width: 768px) {
     main#appContainer {
         flex-direction: column;
-        align-items: center; /* Centraliza as seções na vertical */
+        align-items: center;
     }
 
     #inputControlsSection,
     #outputSection {
-        max-width: 90%; /* Permite que ocupem mais da largura em telas menores */
-        width: 100%; /* Garante que ocupem a largura disponível */
+        max-width: 90%;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    #outputSection {
+        margin-bottom: 0;
+    }
+
+    #wordCloudContainer { /* Ajusta altura em telas menores se usou vh */
+        height: 400px; /* Ou um valor vh menor */
+        min-height: 300px;
     }
 
     header h1 {
