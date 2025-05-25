@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const options = {
             list: wordList,
             gridSize: Math.max(2, Math.round(12 * wordCloudCanvas.width / 1024)),
-            weightFactor: size => Math.max(4, Math.pow(size, 0.60) * (wordCloudCanvas.width / 120)),
+            weightFactor: size => Math.max(8, Math.pow(size, 0.75) * (wordCloudCanvas.width / 100)),
             fontFamily: font,
             color: colorOption,
             backgroundColor: '#FFFFFF',
