@@ -1,0 +1,211 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+main {
+    flex: 1; /* Faz o main crescer para preencher o espaço disponível */
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    width: 95%; /* Garante que o conteúdo não toque as bordas em telas muito largas */
+}
+
+section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff; /* Fundo branco para seções */
+}
+
+h1, h2 {
+    color: #333;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px; /* Aumentado para melhor toque */
+    margin-bottom: 15px; /* Aumentado para melhor espaçamento */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem; /* Tamanho de fonte consistente */
+}
+
+textarea {
+    resize: vertical; /* Permite redimensionamento vertical */
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 12px 15px; /* Aumentado para melhor clique */
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1rem; /* Levemente maior para destaque */
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #4cae4c;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem 0;
+    background: #333;
+    color: #fff;
+    margin-top: auto; /* Empurra o footer para o final da página */
+}
+
+/* Estrutura principal da aplicação com Flexbox */
+#appContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+#inputControlsSection {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#outputSection {
+    flex: 2;
+    min-width: 300px; /* Ajustado para melhor responsividade em telas menores */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#wordCloudContainer {
+    width: 100%;
+    max-width: 600px;
+    height: 400px; /* Altura inicial, pode ser ajustada */
+    border: 1px dashed #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff; /* Fundo para o canvas */
+    margin-top: 10px;
+    position: relative; /* Para posicionamento de elementos internos, se necessário */
+}
+
+#wordCloudCanvas {
+    max-width: 100%;
+    max-height: 100%;
+    display: block; /* Remove espaço extra abaixo do canvas */
+}
+
+#loadingIndicator, #errorMessage {
+    width: calc(100% - 20px); /* Ajusta para padding */
+    max-width: 580px; /* Consistente com wordCloudContainer */
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+    margin: 10px auto 0; /* Centraliza e adiciona margem superior */
+    box-sizing: border-box;
+}
+
+#loadingIndicator {
+    background-color: #d9edf7;
+    border: 1px solid #bce8f1;
+    color: #31708f;
+}
+
+#errorMessage {
+    background-color: #f2dede;
+    border: 1px solid #ebccd1;
+    color: #a94442;
+}
+
+
+/* Media Queries para Responsividade */
+@media (max-width: 768px) {
+    #appContainer {
+        flex-direction: column;
+    }
+
+    #inputControlsSection, #outputSection {
+        flex: 1 1 100%;
+        min-width: auto;
+    }
+
+    #wordCloudContainer {
+        height: 300px; /* Altura menor para telas mobile */
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    main {
+        padding: 10px;
+    }
+
+    section {
+        padding: 10px;
+    }
+
+    input[type="number"],
+    textarea,
+    select {
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    button {
+        padding: 10px 12px;
+        font-size: 1rem;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+    }
+}

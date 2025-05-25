@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Nuvem de Palavras</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Gerador de Nuvem de Palavras</h1>
+    </header>
+    <main id="appContainer">
+        <div id="inputControlsSection">
+            <section id="inputSection" aria-labelledby="inputSectionLabel">
+                <h2 id="inputSectionLabel">1. Insira seu Texto</h2>
+                <label for="textInput">Texto:</label>
+                <textarea id="textInput" rows="10" placeholder="Cole seu texto aqui..."></textarea>
+            </section>
+
+            <section id="controlsSection" aria-labelledby="controlsSectionLabel">
+                <h2 id="controlsSectionLabel">2. Personalize sua Nuvem</h2>
+                <div>
+                    <label for="maxWords">Máximo de Palavras:</label>
+                    <input type="number" id="maxWords" value="100" min="10" max="500">
+                </div>
+                <div>
+                    <label for="colorPalette">Paleta de Cores:</label>
+                    <select id="colorPalette">
+                        <option value="vibrant">Vibrante</option>
+                        <option value="pastel">Pastel</option>
+                        <option value="grayscale">Escala de Cinza</option>
+                        <option value="random-dark">Aleatório Escuro</option>
+                        <option value="random-light">Aleatório Claro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fontStyle">Estilo da Fonte:</label>
+                    <select id="fontStyle">
+                        <option value="Arial, sans-serif" style="font-family: Arial, sans-serif;">Arial</option>
+                        <option value="'Times New Roman', serif" style="font-family: 'Times New Roman', serif;">Times New Roman</option>
+                        <option value="Verdana, sans-serif" style="font-family: Verdana, sans-serif;">Verdana</option>
+                        <option value="'Courier New', monospace" style="font-family: 'Courier New', monospace;">Courier New</option>
+                        <option value="Georgia, serif" style="font-family: Georgia, serif;">Georgia</option>
+                        </select>
+                </div>
+            </section>
+
+            <section id="generationSection">
+                <button id="generateCloudButton">Gerar Nuvem</button>
+            </section>
+        </div>
+
+        <section id="outputSection" aria-labelledby="outputSectionLabel">
+            <h2 id="outputSectionLabel">Sua Nuvem de Palavras:</h2>
+            <div id="loadingIndicator" style="display: none;">Gerando nuvem, por favor aguarde...</div>
+            <div id="errorMessage" style="display: none; color: red;"></div>
+            <div id="wordCloudContainer">
+                <canvas id="wordCloudCanvas"></canvas>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Gerador de Nuvem de Palavras</p>
+    </footer>
+
+    <script src="wordcloud2.min.js"></script>
+    <script src="stopwords-pt.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
