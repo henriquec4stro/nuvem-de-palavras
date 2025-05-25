@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function showLoading(isLoading) {
         loadingIndicator.style.display = isLoading ? 'block' : 'none';
         errorMessageElement.style.display = 'none';
-        frequencyListSection.style.display = 'none';
         [generateButton, textInput, maxWordsInput, colorPaletteSelect, fontStyleSelect].forEach(el => el.disabled = isLoading);
     }
 
@@ -165,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // ✅ Garantir que a seção de frequência esteja visível
         frequencyListSection.style.display = 'block';
 
         const topWords = wordArray.slice(0, topN);
@@ -240,6 +238,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 🔓 Para testes manuais no console
     window.displayFrequencyList = displayFrequencyList;
 });
